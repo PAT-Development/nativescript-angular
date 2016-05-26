@@ -216,13 +216,16 @@ export class NativeScriptRenderer extends Renderer {
 
     public createText(parentElement: NgView, value: string): NgView {
         traceLog('NativeScriptRenderer.createText');
-        return this.viewUtil.createText(value);;
+        return this.viewUtil.createText(value);
     }
 
     public listen(renderElement: NgView, eventName: string, callback: Function): Function {
         traceLog('NativeScriptRenderer.listen: ' + eventName);
         let zonedCallback = (<any>global).Zone.current.wrap(callback);
         renderElement.on(eventName, zonedCallback);
+        if (eventName === View.loadedEvent && renderElement.isLoaded) {
+            renderElement.notify({eventName: View.loadedEvent, object: renderElement});
+        }
         return () => renderElement.off(eventName, zonedCallback);
     }
 
